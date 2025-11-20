@@ -1,6 +1,6 @@
 [package]
 name = "usagepilot"
-version = "0.1.2"
+version = "0.1.3"
 description = "A beautiful desktop application to track and visualize your application usage patterns"
 authors = ["UsagePilot Contributors"]
 license = "MIT"
