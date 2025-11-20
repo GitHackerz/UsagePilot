@@ -64,7 +64,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/yourusername/UsagePilot/releases/latest/download/latest.json"
+        "https://github.com/GitHackerz/UsagePilot/releases/latest/download/latest.json"
       ],
       "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJCREVBOTI4N0QxMDgwODEKUldUWFAzMDZmZGZwUzdnZTkrM1VVYjd6blhGaGt2ZWhZK1pLbVNiMXhFVFg2RzJlS0lGQUhqdgo="
