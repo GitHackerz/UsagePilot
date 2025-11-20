@@ -1,7 +1,7 @@
 {
   "name": "usagepilot",
   "private": true,
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "A beautiful desktop application to track and visualize your application usage patterns",
   "author": "UsagePilot Contributors",
   "license": "MIT",
