@@ -5,10 +5,6 @@ import { Power, Trash2 } from 'lucide-react';
 const Settings: React.FC = () => {
   const [autostartEnabled, setAutostartEnabled] = useState(false);
 
-  useEffect(() => {
-    checkAutostart();
-  }, []);
-
   const checkAutostart = async () => {
     try {
       const active = await isEnabled();
@@ -17,6 +13,11 @@ const Settings: React.FC = () => {
       console.error('Failed to check autostart:', error);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    checkAutostart();
+  }, []);
 
   const toggleAutostart = async () => {
     try {

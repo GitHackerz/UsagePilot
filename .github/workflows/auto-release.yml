@@ -1,14 +1,12 @@
 name: Release with Version Bump
 
 on:
-    push:
+    workflow_run:
+        workflows: ["CI"]
+        types:
+            - completed
         branches:
             - main
-        paths-ignore:
-            - "**.md"
-            - "docs/**"
-            - ".github/**"
-            - "!.github/workflows/**"
 
 permissions:
     contents: write
@@ -16,6 +14,7 @@ permissions:
 
 jobs:
     version-bump:
+        if: github.event.workflow_run.conclusion == 'success'
         runs-on: ubuntu-latest
         outputs:
             new_version: ${{ steps.bump.outputs.new_version }}

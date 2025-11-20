@@ -41,7 +41,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         await invoke('start_tracker');
       }
       set({ isTracking: !isTracking });
-    } catch (error) {
+    } catch {
       console.warn('Tracking toggle failed (likely in browser), toggling UI state only.');
       set({ isTracking: !isTracking });
     }
@@ -55,7 +55,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         total_duration,
       }));
       set({ dailyStats: formattedStats });
-    } catch (error) {
+    } catch {
       console.warn('Failed to fetch stats (likely in browser), using mock data.');
       set({ dailyStats: MOCK_STATS });
     }
