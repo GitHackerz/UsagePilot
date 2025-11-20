@@ -4,7 +4,27 @@ use tauri::{Manager, State};
 use tokio::time::sleep;
 
 mod db;
+#[cfg(target_os = "windows")]
 mod tracker;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct WindowInfo {
+    pub process_name: String,
+    pub title: String,
+}
+
+#[cfg(not(target_os = "windows"))]
+mod tracker {
+    use super::WindowInfo;
+
+    pub fn get_idle_time_seconds() -> u64 {
+        0 // Stub: always return 0 for non-Windows
+    }
+
+    pub fn get_active_window() -> Option<WindowInfo> {
+        None // Stub: no active window tracking for non-Windows
+    }
+}
 
 struct TrackerState {
     is_running: bool,
@@ -12,7 +32,7 @@ struct TrackerState {
 
 fn spawn_tracker_thread(state: Arc<Mutex<TrackerState>>, db_pool: sqlx::Pool<sqlx::Sqlite>) {
     tauri::async_runtime::spawn(async move {
-        let mut current_window_info: Option<tracker::WindowInfo> = None;
+        let mut current_window_info: Option<WindowInfo> = None;
         let mut current_session_id: Option<i64> = None;
         let mut session_start_time = chrono::Local::now().naive_local();
 

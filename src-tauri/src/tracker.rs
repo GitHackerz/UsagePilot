@@ -6,13 +6,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     GetForegroundWindow, GetWindowTextW, GetWindowThreadProcessId,
 };
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct WindowInfo {
-    pub process_name: String,
-    pub title: String,
-}
-
-pub fn get_active_window() -> Option<WindowInfo> {
+pub fn get_active_window() -> Option<super::WindowInfo> {
     unsafe {
         let hwnd = GetForegroundWindow();
         if hwnd.0 == 0 {
@@ -42,7 +36,7 @@ pub fn get_active_window() -> Option<WindowInfo> {
             // We should use `CloseHandle`.
             let _ = windows::Win32::Foundation::CloseHandle(handle);
 
-            Some(WindowInfo {
+            Some(super::WindowInfo {
                 process_name,
                 title,
             })
