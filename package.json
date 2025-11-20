@@ -23,7 +23,10 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "prepare": "husky"
+    "prepare": "husky",
+    "type-check": "tsc --noEmit",
+    "rust-check": "cd src-tauri && cargo fmt -- --check && cargo clippy -- -D warnings",
+    "pre-commit": "npm run type-check && npm run rust-check"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.17",

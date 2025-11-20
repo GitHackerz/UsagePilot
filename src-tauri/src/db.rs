@@ -7,12 +7,15 @@ pub struct DbState {
 }
 
 pub async fn init_db(app: &AppHandle) -> Result<Pool<Sqlite>, Box<dyn std::error::Error>> {
-    let app_data_dir = app.path().app_data_dir().expect("failed to get app data dir");
-    
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .expect("failed to get app data dir");
+
     if !app_data_dir.exists() {
         fs::create_dir_all(&app_data_dir)?;
     }
-    
+
     let db_path = app_data_dir.join("usage_tracker.db");
     let db_url = format!("sqlite://{}", db_path.to_str().unwrap());
 
@@ -36,7 +39,7 @@ pub async fn init_db(app: &AppHandle) -> Result<Pool<Sqlite>, Box<dyn std::error
             duration_seconds INTEGER DEFAULT 0
         );
         CREATE INDEX IF NOT EXISTS idx_start_time ON app_usage(start_time);
-        "
+        ",
     )
     .execute(&pool)
     .await?;
@@ -82,13 +85,13 @@ pub async fn get_daily_stats(pool: &Pool<Sqlite>) -> Result<Vec<(String, i64)>, 
     // Aggregate by process_name for today
     let today = chrono::Local::now().date_naive();
     let start_of_day = today.and_hms_opt(0, 0, 0).unwrap();
-    
+
     let rows = sqlx::query_as::<_, (String, i64)>(
         "SELECT process_name, SUM(duration_seconds) as total_duration 
          FROM app_usage 
          WHERE start_time >= ? 
          GROUP BY process_name 
-         ORDER BY total_duration DESC"
+         ORDER BY total_duration DESC",
     )
     .bind(start_of_day)
     .fetch_all(pool)

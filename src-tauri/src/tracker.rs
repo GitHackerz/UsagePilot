@@ -1,10 +1,10 @@
+use windows::Win32::System::ProcessStatus::GetModuleBaseNameW;
+use windows::Win32::System::SystemInformation::GetTickCount;
+use windows::Win32::System::Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ};
+use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
 use windows::Win32::UI::WindowsAndMessaging::{
     GetForegroundWindow, GetWindowTextW, GetWindowThreadProcessId,
 };
-use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
-use windows::Win32::System::ProcessStatus::GetModuleBaseNameW;
-use windows::Win32::System::Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ};
-use windows::Win32::System::SystemInformation::GetTickCount;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct WindowInfo {
@@ -36,7 +36,7 @@ pub fn get_active_window() -> Option<WindowInfo> {
             // The windows crate's HANDLE implements Drop if it's a specific type, but raw HANDLEs don't.
             // Actually, windows 0.52 HANDLEs are wrappers. But OpenProcess returns Result<HANDLE, Error>.
             // Let's check if we need to close it. In windows crate 0.48+, Owned handles drop automatically.
-            // But OpenProcess returns a HANDLE which is Copy. We should probably use `Owned<HANDLE>` or manually close if we want to be safe, 
+            // But OpenProcess returns a HANDLE which is Copy. We should probably use `Owned<HANDLE>` or manually close if we want to be safe,
             // but for now let's assume the windows crate wrapper handles it or we leak a handle every second (bad).
             // Wait, `windows::Win32::Foundation::HANDLE` is `Copy` and `Clone`. It does NOT close on drop.
             // We should use `CloseHandle`.
