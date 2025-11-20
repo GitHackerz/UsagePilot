@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Generate Icons</title>
+</head>
+<body>
+  <canvas id="canvas" width="512" height="512"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Create gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+    gradient.addColorStop(0, '#3b82f6');
+    gradient.addColorStop(1, '#6366f1');
+    
+    // Draw background circle
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(256, 256, 240, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw chart base
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.beginPath();
+    ctx.arc(256, 256, 140, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw chart segments
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.beginPath();
+    ctx.moveTo(256, 256);
+    ctx.lineTo(256, 116);
+    ctx.arc(256, 256, 140, -Math.PI/2, -Math.PI/6, false);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.beginPath();
+    ctx.moveTo(256, 256);
+    ctx.arc(256, 256, 140, -Math.PI/6, Math.PI/4, false);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.beginPath();
+    ctx.moveTo(256, 256);
+    ctx.arc(256, 256, 140, Math.PI/4, Math.PI, false);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Draw center dot
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(256, 256, 32, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw computer screen
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(176, 300, 160, 112, 8);
+    ctx.fill();
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.roundRect(188, 312, 136, 80, 4);
+    ctx.fill();
+    
+    // Draw screen stand
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(240, 412, 32, 16, 4);
+    ctx.fill();
+    
+    // Download as PNG
+    console.log('Icon generated. Right-click canvas and save as PNG.');
+  </script>
+</body>
+</html>

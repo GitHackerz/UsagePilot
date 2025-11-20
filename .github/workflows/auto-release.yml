@@ -1,0 +1,177 @@
+name: Release with Version Bump
+
+on:
+    push:
+        branches:
+            - main
+        paths-ignore:
+            - "**.md"
+            - "docs/**"
+            - ".github/**"
+            - "!.github/workflows/**"
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    version-bump:
+        runs-on: ubuntu-latest
+        outputs:
+            new_version: ${{ steps.bump.outputs.new_version }}
+            should_release: ${{ steps.check.outputs.should_release }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Check if version bump needed
+              id: check
+              run: |
+                  # Check if last commit already bumped version
+                  if git log -1 --pretty=%B | grep -q "chore: bump version"; then
+                    echo "should_release=false" >> $GITHUB_OUTPUT
+                    echo "Last commit was a version bump, skipping"
+                  else
+                    echo "should_release=true" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Determine version bump type
+              id: bump_type
+              if: steps.check.outputs.should_release == 'true'
+              run: |
+                  # Check commit messages for version bump hints
+                  COMMITS=$(git log --pretty=%B -n 10)
+
+                  if echo "$COMMITS" | grep -qiE "^(breaking|major):"; then
+                    echo "bump_type=major" >> $GITHUB_OUTPUT
+                  elif echo "$COMMITS" | grep -qiE "^(feat|feature):"; then
+                    echo "bump_type=minor" >> $GITHUB_OUTPUT
+                  else
+                    echo "bump_type=patch" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Bump version
+              id: bump
+              if: steps.check.outputs.should_release == 'true'
+              run: |
+                  # Get current version
+                  CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+                  # Bump version based on type
+                  BUMP_TYPE="${{ steps.bump_type.outputs.bump_type }}"
+                  IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+                  MAJOR="${VERSION_PARTS[0]}"
+                  MINOR="${VERSION_PARTS[1]}"
+                  PATCH="${VERSION_PARTS[2]}"
+
+                  if [ "$BUMP_TYPE" = "major" ]; then
+                    MAJOR=$((MAJOR + 1))
+                    MINOR=0
+                    PATCH=0
+                  elif [ "$BUMP_TYPE" = "minor" ]; then
+                    MINOR=$((MINOR + 1))
+                    PATCH=0
+                  else
+                    PATCH=$((PATCH + 1))
+                  fi
+
+                  NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+                  echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+                  # Update package.json
+                  npm version $NEW_VERSION --no-git-tag-version
+
+                  # Update Cargo.toml
+                  sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" src-tauri/Cargo.toml
+
+                  # Update tauri.conf.json
+                  sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" src-tauri/tauri.conf.json
+
+            - name: Commit version bump
+              if: steps.check.outputs.should_release == 'true'
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
+                  git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
+                  git tag "v${{ steps.bump.outputs.new_version }}"
+                  git push origin main
+                  git push origin "v${{ steps.bump.outputs.new_version }}"
+
+    build-release:
+        needs: version-bump
+        if: needs.version-bump.outputs.should_release == 'true'
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - platform: "macos-latest"
+                      args: "--target aarch64-apple-darwin"
+                    - platform: "macos-latest"
+                      args: "--target x86_64-apple-darwin"
+                    - platform: "ubuntu-22.04"
+                      args: ""
+                    - platform: "windows-latest"
+                      args: ""
+
+        runs-on: ${{ matrix.platform }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  ref: main
+
+            - name: Install dependencies (Ubuntu only)
+              if: matrix.platform == 'ubuntu-22.04'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "npm"
+
+            - name: Install Rust stable
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+            - name: Rust cache
+              uses: swatinem/rust-cache@v2
+              with:
+                  workspaces: "./src-tauri -> target"
+
+            - name: Install frontend dependencies
+              run: npm ci
+
+            - name: Build Tauri app
+              uses: tauri-apps/tauri-action@v0
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tagName: v${{ needs.version-bump.outputs.new_version }}
+                  releaseName: "UsagePilot v${{ needs.version-bump.outputs.new_version }}"
+                  releaseBody: |
+                      ## What's New in v${{ needs.version-bump.outputs.new_version }}
+
+                      See [CHANGELOG.md](https://github.com/yourusername/UsagePilot/blob/main/CHANGELOG.md) for details.
+
+                      ### Installation
+                      - **Windows**: Download and run the `.msi` or `.exe` installer
+                      - **macOS**: Download the `.dmg` file, open it, and drag UsagePilot to Applications
+                      - **Linux**: Download `.deb` or `.AppImage` and install
+
+                      ### Checksums
+                      All release artifacts are signed and include checksums for verification.
+                  releaseDraft: false
+                  prerelease: false
+                  args: ${{ matrix.args }}

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#grad1)"/>
+  
+  <!-- Clock/pie chart representation -->
+  <circle cx="64" cy="64" r="35" fill="white" opacity="0.2"/>
+  
+  <!-- Chart segments -->
+  <path d="M 64 64 L 64 29 A 35 35 0 0 1 87 45 Z" fill="white" opacity="0.9"/>
+  <path d="M 64 64 L 87 45 A 35 35 0 0 1 92 72 Z" fill="white" opacity="0.7"/>
+  <path d="M 64 64 L 92 72 A 35 35 0 0 1 64 99 Z" fill="white" opacity="0.5"/>
+  
+  <!-- Center dot -->
+  <circle cx="64" cy="64" r="8" fill="white"/>
+  
+  <!-- Computer screen icon overlay -->
+  <rect x="44" y="75" width="40" height="28" rx="2" fill="white" opacity="0.9"/>
+  <rect x="47" y="78" width="34" height="20" fill="url(#grad1)"/>
+  <rect x="60" y="103" width="8" height="4" rx="1" fill="white" opacity="0.9"/>
+</svg>

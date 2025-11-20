@@ -1,0 +1,52 @@
+name: Update Changelog
+
+on:
+    push:
+        tags:
+            - "v*"
+
+permissions:
+    contents: write
+
+jobs:
+    update-changelog:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Generate changelog entry
+              id: changelog
+              run: |
+                  VERSION=${GITHUB_REF#refs/tags/v}
+                  DATE=$(date +%Y-%m-%d)
+
+                  # Get commits since last tag
+                  LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+                  if [ -z "$LAST_TAG" ]; then
+                    COMMITS=$(git log --pretty=format:"- %s" HEAD)
+                  else
+                    COMMITS=$(git log --pretty=format:"- %s" ${LAST_TAG}..HEAD)
+                  fi
+
+                  # Create changelog entry
+                  ENTRY="## [$VERSION] - $DATE\n\n### Changes\n$COMMITS\n"
+
+                  # Insert into CHANGELOG.md after [Unreleased] section
+                  sed -i "/## \[Unreleased\]/a\\n$ENTRY" CHANGELOG.md
+
+            - name: Commit updated changelog
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git add CHANGELOG.md
+                  git commit -m "docs: update changelog for ${GITHUB_REF#refs/tags/}" || echo "No changes to commit"
+                  git push origin HEAD:main || echo "Nothing to push"

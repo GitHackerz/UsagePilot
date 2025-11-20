@@ -1,0 +1,16 @@
+{
+  "name": "UsagePilot",
+  "short_name": "UsagePilot",
+  "description": "Track and visualize your application usage patterns",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
