@@ -15,6 +15,10 @@
   [Features](#features) • [Installation](#installation) • [Usage](#usage) • [Contributing](#contributing) • [License](#license)
 </div>
 
+<div align="center">
+  <img src="docs/screenshots/home.png" alt="UsagePilot Dashboard" width="800">
+</div>
+
 ---
 
 ## 🚀 Features
